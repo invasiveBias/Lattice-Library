@@ -1,16 +1,7 @@
 import torch
 import numpy as np
 import math
-from functools import reduce
 
-
-def obj_alloc(num):
-    if 'int' in f'{type(num)}':
-        return Integer(num)
-    elif 'float' in f'{type(num)}':
-        return Float(num)
-    else:
-        return array(num)
 
 class Lattice_object(type):
     def __repr__(cls):
@@ -18,236 +9,20 @@ class Lattice_object(type):
         typ = typ.lower()
         return typ
 
-class Integer(int,metaclass=Lattice_object):
-    def __init__(self,val=0):
-        self._val = val
-    def __add__(self, val):
-        #if isinstance(val, Integer):
-            #return Integer(self._val + val)
-        return Integer(self._val + val)
-    def __radd__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val + val._val)
-        return Integer(self._val + val)
-    def __iadd__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val + val._val)
-        return Integer(self._val + val)
-    
-    def __sub__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val - val._val)
-        return Integer(self._val - val)
-    def __rsub__(self, val):
-        if isinstance(val, Integer):
-            return Integer(val._val - self._val)
-        return Integer(val - self.val)
-    def __isub__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val - val._val)
-        return Integer(self._val - val)
-    
-    def __mul__(self, val):
-        return Integer(self._val * val)
-    def __rmul__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val * val._val)
-        return Integer(self._val * val)
-    def __imul__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val * val._val)
-        return Integer(self._val * val)
-    
-    def __truediv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val / val._val)
-        return Integer(self._val / val)
-    def __rtruediv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(val._val / self._val)
-        return Integer(val / self._val)
-    def __itruediv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val / val._val)
-        return Integer(self._val / val)
-    
-    def __floordiv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val // val._val)
-        return Integer(self._val // val)
-    def __rfloordiv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(val._val // self._val)
-        return Integer(val // self._val)
-    def __ifloordiv__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val // val._val)
-        return Integer(self._val // val)
-    
-    def __mod__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val % val._val)
-        return Integer(self._val % val)
-    def __rmod__(self, val):
-        if isinstance(val, Integer):
-            return Integer(val._val % self._val)
-        return Integer(val % self._val)
-    def __imod__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val % val._val)
-        return Integer(self._val % val)
-    
-    def __pow__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val ** val._val)
-        return Integer(self._val ** val)
-    def __rpow__(self, val):
-        if isinstance(val, Integer):
-            return Integer(val._val ** self._val)
-        return Integer(val ** self._val)
-    def __ipow__(self, val):
-        if isinstance(val, Integer):
-            return Integer(self._val ** val._val)
-        return Integer(self._val ** val)
-    
-    def __str__(self):
-        return str(self._val)
-    def __repr__(self):
-        return  f"{self._val}"
-    def __index__(self):
-        return self.value
-        
 
-
-class Float(float, metaclass= Lattice_object):
-    def __init__(self,val=0):
-        self._val = val
-    def __add__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val + val._val)
-        return Float(self._val + val)
-    def __radd__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val + val._val)
-        return Float(self._val + val)
-    def __iadd__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val + val._val)
-        return Float(self._val + val)
-    
-    def __sub__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val - val._val)
-        return Float(self._val - val)
-    def __rsub__(self, val):
-        if isinstance(val, Float):
-            return Float(val._val - self._val)
-        return Float(val - self._val)
-    def __isub__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val - val._val)
-        return Float(self._val - val)
-    
-    def __mul__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val * val._val)
-        return Float(self._val * val)
-    def __rmul__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val * val._val)
-        return Float(self._val * val)
-    def __imul__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val * val._val)
-        return Float(self._val * val)
-    
-    def __truediv__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val / val._val)
-        return Float(self._val / val)
-    def __rtruediv__(self, val):
-        if isinstance(val, Float):
-            return Float(val._val / self._val)
-        return Float(val / self._val)
-    def __itruediv__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val / val._val)
-        return Float(self._val / val)
-    
-    def __floordiv__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val // val._val)
-        return Float(self._val // val)
-    def __rfloordiv__(self, val):
-        if isinstance(val, Float):
-            return Float(val._val // self._val)
-        return Float(val // self._val)
-    def __ifloordiv__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val // val._val)
-        return Float(self._val // val)
-    
-    def __mod__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val % val._val)
-        return Float(self._val % val)
-    def __rmod__(self, val):
-        if isinstance(val, Float):
-            return Float(val._val % self._val)
-        return Float(val % self._val)
-    def __imod__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val % val._val)
-        return Float(self._val % val)
-    
-    def __pow__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val ** val._val)
-        return Float(self._val ** val)
-    def __rpow__(self, val):
-        if isinstance(val, Float):
-            return Float(val._val ** self._val)
-        return Float(val ** self._val)
-    def __ipow__(self, val):
-        if isinstance(val, Float):
-            return Float(self._val ** val._val)
-        return Float(self._val ** val)
-    
-    def __str__(self):
-        return str(self._val)
-    def __repr__(self):
-        return  f"{self._val}"
-
-               
-
-def converter(cls, a,args=None):
-    if args != None :
-        args = args[0] if type(args[0]) == tuple else args
-        num = args
-        t_num = reduce((lambda x, y: x * y), num)
-        a = a.reshape(1,t_num)[0]
-        nl = []
-        for v in a:
-            nl.append(obj_alloc(v))
-        obj = np.asarray(nl,dtype=object).view(cls)
-        obj = obj.reshape(args)
-    else:
-        a = np.asarray(a,dtype=np.float32)
-        shape = a.shape if a.shape else (1,)
-        t_num = reduce((lambda x, y: x * y), shape)
-        a = a.flatten()#(1,t_num)[0]
-        nl = []
-        for v in a:
-            nl.append(obj_alloc(v))
-        obj = np.asarray(nl,dtype=object).view(cls)
-        obj = obj.reshape(shape)
-            
-
-    return obj
         
 class array(metaclass= Lattice_object):
-    def __init__(self,obj,arg=None,requires_grad = False, operation = None,tag=None):
-        self._data = converter(array,obj,arg)
+    def __init__(self,obj,arg=None,requires_grad = False, operation = None,tag=None,dtype=float):
+        if type(obj) == list and type(obj[0]) == array:
+            n_lst = []
+            for i in obj:
+                i = array(i) if f"{type(i)}" != 'lattice.array' else i
+                n_lst.append(i._data)
+            try:
+                obj = np.concatenate(n_lst)
+            except ValueError as err:
+                obj = np.array(n_lst)
+        self._data = np.array(obj,dtype=dtype) if type(obj) != np.ndarray else obj
         self.requires_grad = requires_grad
         self.operation = operation
         self.children = []
@@ -255,9 +30,15 @@ class array(metaclass= Lattice_object):
         if self.requires_grad:
             self.grad = np.zeros_like(self._data)
         self.tag = tag
-        
+        self.scalar = False
+        if len(self.shape) == 0:
+            self.scalar = True
+        self.ind = 0
+        self.type = dtype
     def __repr__(self):
-        return f'Lt_tensor({self._data}, requires_grad = {self.requires_grad})'
+        rg = f',requires_grad = {self.requires_grad})' if self.requires_grad == True else ''
+        rep = f'{self._data} {rg}' if self.scalar == True else f'Lt_tensor({self._data} {rg})'
+        return rep
     
     
     def backward(self, grad = None, z = None):
@@ -342,10 +123,6 @@ class array(metaclass= Lattice_object):
         op = Neg()
         return op.forward(self) 
     
-    def reshape(self,new_shape:tuple):
-        arr = self._data.flatten()
-        arr = array(arr,new_shape,requires_grad=self.requires_grad)
-        return arr
     
     def T(self):
         arr = self.reshape(self._data.T.shape)
@@ -382,20 +159,121 @@ class array(metaclass= Lattice_object):
         other = array(other) if type(other) != type(self) else other
         return op.forward(self, other)
     
+    def __rtruediv__(self, other):
+        """ New = self / other """
+        op = Div()
+        other = array(other) if type(other) != type(self) else other
+        return op.forward(other, self)
+    
+    def __itruediv__(self, other):
+        """ New = self / other """
+        op = Div()
+        other = array(other) if type(other) != type(self) else other
+        return op.forward(other, self)
+    
     def __matmul__(self, other):
         """ New = self @ other """
         op = MatMul()
         other = array(other) if type(other) != type(self) else other
         return op.forward(self, other)
     
-    def __getitem__(self, index): 
-        """ New = self[index] """
-        op = Slice()
-        return op.forward(self, index)
+    
+    def __len__(self):
+        return len(self._data)
+    
 
     def __gt__(self, other):
         """ New = self > other """
-        return self._data > array(other)
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data > other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __lt__(self, other):
+        """ New = self > other """
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data < other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __ge__(self, other):
+        """ New = self > other """
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data >= other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __le__(self, other):
+        """ New = self > other """
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data <= other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __eq__(self,other):
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data == other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __ne__(self,other):
+        other = array(other) if type(other) != type(self) else other
+        return array(self._data != other._data ,requires_grad=self.requires_grad,dtype=bool)
+    
+    def __getitem__(self, index): 
+        """ New = self[index] """
+        index = index._data.astype(int) if type(index) == array else index
+        op = Slice()
+        return op.forward(self, index)
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        lng = self.shape[0]
+        if self.ind < lng:
+            val = self[self.ind]
+            self.ind += 1
+            return val
+        else:
+            self.ind = 0
+            raise StopIteration
+    
+    def __index__(self):
+        return self.astype(int).item()
+        
+    def __setitem__(self, index, value):
+        if type(index) == tuple and type(index[0]) == array:
+            self._data[index[0]._data.astype(int),:] = value
+        elif type(index) == tuple and type(index[1]) == array:
+            self._data[:,index[1]._data.astype(int)] = value
+        elif type(index) == array:
+            self._data[index._data.astype(int)] = value
+        else:
+            self._data[index] = value
+    
+    def __bool__(self):
+        return self._data.tolist() != 0
+    
+    def reshape(self,*args):
+        self._data = self._data.reshape(*args)
+        self.shape = self._data.shape
+        return self
+    
+    def flatten(self):
+        arr = self._data.flatten()
+        return array(arr)
+    
+    def T(self):
+        arr = self._data.T
+        return array(arr,requires_grad = self.requires_grad)
+    
+    def to_numpy(self,dtype=float):
+        return np.array(self._data,dtype=dtype)
+    
+    def tolist(self):
+        return self._data.tolist()
+    
+    def item(self):
+        if self.scalar or self.shape == (1,):
+            return self._data.item()
+        else:
+            raise Exception("Only scalar or tensor of shape (1,) has the item method")
+        
+    def astype(self,new_type):
+        nt = new_type
+        self._data = self._data.astype(nt)
+        return self
 
     def max(self, dim= None, keepdims=False):
         """
@@ -1012,12 +890,18 @@ class Slice:
 
     def forward(self, a, index):
         requires_grad = a.requires_grad
-      
-        # Get new Tensor's data:
-        data = a._data[index]
-       
+        if type(index) == tuple and type(index[1]) == array:
+            index = index[1]._data.astype(int)
+            data = a._data[:,index]
+            
+        elif type(index) == tuple and type(index[0]) == array:
+            index = index[0]._data.astype(int)
+            data =  a._data[index,:]
+        else:
+            data = a._data[index]
+        
         # Create new Tensor:
-        z = array(data, requires_grad=requires_grad, operation=self) 
+        z = array(data, requires_grad=requires_grad, operation=self)
        
         # Add new Tensors to "children" and old Tensors to "parents":
         self.parents = (a,)
@@ -1028,7 +912,6 @@ class Slice:
     
     def backward(self, dz, z):
         a, index =  self.cache
-        
         # Find gradients relative to "a", and pass it downstream:
         if a.requires_grad:
             # Add upstream gradients to [index] part of da.

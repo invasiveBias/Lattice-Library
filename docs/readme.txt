@@ -3,3 +3,4 @@ It is built on Numpy and still has a lot of computations and calculations done i
 also an array datatype,simple random Number genrators, some Linear algebra functions and an Autograd Engine(similar to Pytorch's) within the array datatype that computes the derivatives 
 for common operations. Newer versions would come with more advanced number generators, more Linear algebraic and Statistical functions that natively runs calculations,
 a more powerful autograd Engine and also sub-packages for Classical ML, DL & RL model instantiations natively built from scratch.
+
