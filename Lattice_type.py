@@ -34,7 +34,7 @@ class array(metaclass= Lattice_object):
         if len(self.shape) == 0:
             self.scalar = True
         self.ind = 0
-        self.type = dtype
+        self.dtype = dtype
     def __repr__(self):
         rg = f',requires_grad = {self.requires_grad})' if self.requires_grad == True else ''
         rep = f'{self._data} {rg}' if self.scalar == True else f'Lt_tensor({self._data} {rg})'
@@ -169,7 +169,7 @@ class array(metaclass= Lattice_object):
         """ New = self / other """
         op = Div()
         other = array(other) if type(other) != type(self) else other
-        return op.forward(other, self)
+        return op.forward(self, other)
     
     def __matmul__(self, other):
         """ New = self @ other """
@@ -212,7 +212,6 @@ class array(metaclass= Lattice_object):
     
     def __getitem__(self, index): 
         """ New = self[index] """
-        index = index._data.astype(int) if type(index) == array else index
         op = Slice()
         return op.forward(self, index)
     
@@ -234,11 +233,15 @@ class array(metaclass= Lattice_object):
         
     def __setitem__(self, index, value):
         if type(index) == tuple and type(index[0]) == array:
-            self._data[index[0]._data.astype(int),:] = value
+            index = index[0]._data.astype(int) if index[0].dtype == float else index[0]._data
+            self._data[index,:] = value
         elif type(index) == tuple and type(index[1]) == array:
-            self._data[:,index[1]._data.astype(int)] = value
+            index = index[1]._data.astype(int) if index[1].dtype == float else index[1]._data
+            self._data[:,index] = value
         elif type(index) == array:
-            self._data[index._data.astype(int)] = value
+            index = index._data.astype(int) if index.dtype == float else index._data
+        
+            self._data[index] = value
         else:
             self._data[index] = value
     
@@ -891,14 +894,20 @@ class Slice:
     def forward(self, a, index):
         requires_grad = a.requires_grad
         if type(index) == tuple and type(index[1]) == array:
-            index = index[1]._data.astype(int)
+            index = index[1]._data.astype(int) #if index[1].dtype == float else index[1]._data 
             data = a._data[:,index]
             
         elif type(index) == tuple and type(index[0]) == array:
-            index = index[0]._data.astype(int)
+            index = index[0]._data.astype(int) #if index[0].dtype == float else index[0]._data 
             data =  a._data[index,:]
+            
+        elif type(index) == array:
+            index = index._data.astype(int) if index.dtype == float else index._data
+            data = a._data[index]
+            #print(f"index: {index} \n data: {a}, \n result: {data}")
         else:
             data = a._data[index]
+            
         
         # Create new Tensor:
         z = array(data, requires_grad=requires_grad, operation=self)

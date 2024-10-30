@@ -44,9 +44,13 @@ def dot(val,val2):
         requires_grad = val.requires_grad or val2.requires_grad
         return array(arr, requires_grad = requires_grad)
     
-def unique(val):
-    arr = np.unique(val._data)
-    return array(arr, requires_grad = val.requires_grad)
+def unique(val,return_counts= False):
+    val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
+    arr = np.unique(val._data,return_counts= return_counts) 
+    if return_counts == False:
+        return array(arr, requires_grad = val.requires_grad)
+    else:
+        return array(arr[0], requires_grad = val.requires_grad) , arr[1]
 
 
 # element-wise transformations
@@ -68,8 +72,8 @@ def log(val):
 
 def log10(val):
     val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
-    val._data = np.log10(val._data.astype(float))
-    return val
+    arr = np.log10(val._data.astype(float))
+    return array(arr)
 
 def log2(val):
     val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
@@ -108,6 +112,7 @@ def where(condition, x, y):
     return array(val)
 
 def sign(val):
+    val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
     val = np.sign(val._data)
     return array(val)
 
@@ -125,6 +130,12 @@ def percentile(val,q,axis=None):
     val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
     arr = np.percentile(val._data,q,axis=axis)
     return array(arr)
+
+def full(shape, fill_value, dtype=None):
+    fill_value = array(fill_value) if type(fill_value) != array else fill_value
+    arr = np.full(shape=shape, fill_value=fill_value._data,dtype=dtype)
+    return array(arr)
+
 class matrix_comp():
     def __init__(Self):
         pass
