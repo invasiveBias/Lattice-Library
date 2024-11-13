@@ -35,32 +35,40 @@ class Decision_Tree:
         self.n_feats = n_feats
         self.root = None
         self.mode = mode
-        if self.mode not in ['cls','rgs']:
-            return f'Mode can only be "cls" for classification or "rgs" for regression and not {mode} '
+        if self.mode not in ['cls','rgs','grd']:
+            raise Exception(f'Mode can only be "cls" for classification, "rgs" for regression or "grd" for gradient boosting methods and not {mode}')
     
     def fit(self,X,y):
-        X = array(X)
-        y = array(y)
+        X = array(X) if type(X) != array else X
+        y = array(y) if type(y) != array else y
         self.n_feats = X.shape[1] if not self.n_feats else min(self.n_feats,X.shape[1])
         self.root = self.grow_tree(X,y)
     
-    def grow_tree(self,X,y, depth=0):
+    def grow_tree(self,X,y, depth=0,default_value=0):
         n_samples, n_features = X.shape
         n_labels = len(lt.unique(y))
 
         
-        if depth>= self.max_depth or n_labels == 1 or  n_samples < self.min_sample_split:
-            leaf_value = self.most_common_label(y) if self.mode == 'cls' else self.average_value(y)
+        if depth>= self.max_depth or n_labels <= 1 or  n_samples < self.min_sample_split:
+            if len(y) == 0:
+                leaf_value = default_value if default_value is not None else 0
+            else:
+                if self.mode == 'cls':
+                    leaf_value = self.most_common_label(y)  
+                elif self.mode == 'rgs':
+                    leaf_value = self.average_value(y)
+                else:
+                    leaf_value = y
             return Node(value=leaf_value)
         
         feat_idxs = choice(n_features,self.n_feats, replace= False)
         
         best_feat, best_thresh = self.best_criteria(X,y,feat_idxs, entropy) if self.mode == 'cls' else self.best_criteria(X,y,feat_idxs, mse)
-        #print(best_feat)
         left_idxs, right_idxs = self.split(X[:,best_feat], best_thresh)
-        #print(left_idxs, right_idxs)
-        left = self.grow_tree(X[left_idxs,:], y[left_idxs],depth+1)
-        right = self.grow_tree(X[right_idxs,:], y[right_idxs],depth+1)
+        left = self.grow_tree(X[left_idxs,:], y[left_idxs],depth=depth+1,default_value=default_value)
+        default_value = left.value
+        right = self.grow_tree(X[right_idxs,:], y[right_idxs],depth=depth+1,default_value=default_value)
+        default_value = right.value
         return Node(best_feat,best_thresh,left,right)
         
     
@@ -106,7 +114,10 @@ class Decision_Tree:
     
     def predict(self,X):
         X = array(X)
-        return array([self.traverse_tree(x,self.root) for x in X])
+        if self.mode == 'cls' or self.mode == 'rgs':
+            return array([self.traverse_tree(x,self.root) for x in X])
+        else:
+            return [self.traverse_tree(x,self.root) for x in X]
     
 
     def traverse_tree(self,x,node):

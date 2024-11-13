@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import math
 
@@ -16,12 +15,9 @@ class array(metaclass= Lattice_object):
         if type(obj) == list and type(obj[0]) == array:
             n_lst = []
             for i in obj:
-                i = array(i) if f"{type(i)}" != 'lattice.array' else i
-                n_lst.append(i._data)
-            try:
-                obj = np.concatenate(n_lst)
-            except ValueError as err:
-                obj = np.array(n_lst)
+                i = i._data if type(i) == array else i
+                n_lst.append(i)
+            obj = np.array(n_lst)
         self._data = np.array(obj,dtype=dtype) if type(obj) != np.ndarray else obj
         self.requires_grad = requires_grad
         self.operation = operation
@@ -33,7 +29,6 @@ class array(metaclass= Lattice_object):
         self.scalar = False
         if len(self.shape) == 0:
             self.scalar = True
-        self.ind = 0
         self.dtype = dtype
     def __repr__(self):
         rg = f',requires_grad = {self.requires_grad})' if self.requires_grad == True else ''
@@ -152,6 +147,11 @@ class array(metaclass= Lattice_object):
         other = array(other) if type(other) != type(self) else other
         return op.forward(self, other)
     
+    def __rpow__(self, other):
+        """ New = other ** power """
+        op = Pow()
+        other = array(other) if type(other) != type(self) else other
+        return op.forward(other, self)
     
     def __truediv__(self, other):
         """ New = self / other """
@@ -216,16 +216,15 @@ class array(metaclass= Lattice_object):
         return op.forward(self, index)
     
     def __iter__(self):
+        self.ind = 0
         return self
     
     def __next__(self):
-        lng = self.shape[0]
-        if self.ind < lng:
+        if self.ind < self.shape[0]:
             val = self[self.ind]
             self.ind += 1
             return val
         else:
-            self.ind = 0
             raise StopIteration
     
     def __index__(self):
@@ -400,7 +399,6 @@ class Add:
             b.backward(db, z)
 
 
-
 class Neg:
 
     def forward(self, a):
@@ -427,7 +425,6 @@ class Neg:
         if a.requires_grad:
             da = -dz # the derivative for a the negate of a variable is just the negative of the addition derivative
             a.backward(da, z)
-
 
 
 class Mul:
@@ -483,7 +480,6 @@ class Mul:
                 if dim == 1:
                     db = db.sum(axis=n, keepdims=True)
             b.backward(db, z)
-
 
 
 class Div:

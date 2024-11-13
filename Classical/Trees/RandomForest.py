@@ -37,12 +37,10 @@ class Random_Forest():
             
     def predict(self, X):
         if self.mode == 'cls':
-            tree_preds = concatenate([tree.predict(X) for tree in self.trees],axis=1).T()
-            pred = [most_common_label(y) for y in tree_preds]
+            tree_preds = array([tree.predict(X) for tree in self.trees])
+            pred = [most_common_label(y) for y in tree_preds.T()]
             return array(pred)
         if self.mode == 'rgs':
-            tree_preds = concatenate([tree.predict(X) for tree in self.trees],axis=1).T()
-            pred = [lt.mean(y.tolist()) for y in tree_preds]
+            tree_preds = array([tree.predict(X) for tree in self.trees])
+            pred = [lt.mean(y) for y in tree_preds.T()]
             return array(pred)
-    
-    

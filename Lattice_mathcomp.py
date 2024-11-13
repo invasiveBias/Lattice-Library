@@ -15,7 +15,7 @@ def sum(val,dim= None):
     
     
 def mean(val,dim=None):
-    val = as_array(val) if f"{type(val)}" != 'lattice.array' else val
+    val = array(val) if type(val) != array else val
     arr = np.mean(val._data,dim)
     return array(arr, requires_grad = val.requires_grad)
 

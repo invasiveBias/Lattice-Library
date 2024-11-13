@@ -70,7 +70,7 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis
     
 def randint(low, high=None, size=None, dtype=int,requires_grad=False):
     val= np.random.randint(low,high,size,dtype)
-    return array(val,requires_grad=requires_grad)
+    return array(val,requires_grad=requires_grad,dtype=int)
 
 
 def zeros_like(a, dtype=None,requires_grad=False):
@@ -96,4 +96,10 @@ def concatenate(lst:list,axis=0,*args,**kwargs):
     except ValueError as err:
         arr = np.array(n_lst)
     return array(arr)
+
+def column_stack(lst:tuple):
+    return array(np.column_stack(lst))
+
+def row_stack(lst:tuple):
+    return array(np.row_stack(lst))
 
