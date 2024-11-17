@@ -1,5 +1,8 @@
 import sys
-sys.path.append('C:/Users/LENOVO/Desktop/Lattice library/Lattice')
+from pathlib import Path
+current_file = Path(__file__).resolve()
+parent_directory = current_file.parent.parent
+sys.path.append(str(parent_directory))
 import Lattice_mathcomp as lt
 from Lattice_type import array
 import numpy as np

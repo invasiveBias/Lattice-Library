@@ -1,5 +1,8 @@
 import sys
-sys.path.append('C:/Users/LENOVO/Desktop/Lattice library/Lattice')
+from pathlib import Path
+current_file = Path(__file__).resolve()
+parent_directory = current_file.parent.parent
+sys.path.append(str(parent_directory))
 import numpy as np
 from collections import Counter
 import Lattice_mathcomp as lt
@@ -31,7 +34,7 @@ class KNN:
                 most_common = Counter(k_nearest_labels).most_common(1)
                 predicted_labels.append(most_common[0][0])
             elif self.mode == 'rgs':
-                predicted_labels.append(np.mean(k_nearest_labels))
+                predicted_labels.append(lt.mean(k_nearest_labels))
             else:
                 return f"modes can either be 'cls' for classification or 'rgs' for regression, not {self.mode}"
         return array(predicted_labels)

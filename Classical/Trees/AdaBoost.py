@@ -1,5 +1,10 @@
 import sys
-sys.path.append('C:/Users/LENOVO/Desktop/Lattice library/Lattice')
+from pathlib import Path
+current_file = Path(__file__).resolve()
+parent_directory = current_file.parent.parent
+grandparent_directory = current_file.parent.parent.parent
+sys.path.append(str(parent_directory))
+sys.path.append(str(grandparent_directory))
 from main import *
 import Lattice_mathcomp as lt
 
