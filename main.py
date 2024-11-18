@@ -66,7 +66,7 @@ def choice(a, size=None, replace=True, p=None, requires_grad=False):
     
 def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis=0,requires_grad=False):
     val = np.linspace(start, stop, num, endpoint, retstep, dtype, axis)
-    return array(val,args[2:],requires_grad=requires_grad)
+    return array(val,requires_grad=requires_grad)
     
 def randint(low, high=None, size=None, dtype=int,requires_grad=False):
     val= np.random.randint(low,high,size,dtype)
@@ -74,14 +74,18 @@ def randint(low, high=None, size=None, dtype=int,requires_grad=False):
 
 
 def zeros_like(a, dtype=None,requires_grad=False):
-    data = to_numpy(a)
+    data = a._data
     val = np.zeros_like(data, dtype,)
     return array(val,requires_grad=requires_grad)
 
 
 def ones_like(a, dtype=None,requires_grad=False):
-    data = to_numpy(a)
+    data = a._data
     val = np.ones_like(data,dtype)
+    return array(val,requires_grad=requires_grad)
+
+def empty(shape, dtype=object,requires_grad=False):
+    val = np.empty(shape,dtype=dtype)
     return array(val,requires_grad=requires_grad)
 
 

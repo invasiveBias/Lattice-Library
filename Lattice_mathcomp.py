@@ -57,13 +57,13 @@ def unique(val,return_counts= False):
 
 def abs(val,*args):
     val = array(val) if type(val) != array else val
-    val._data = np.abs(val._data,*args)
-    return val
+    arr = np.abs(val._data,*args)
+    return array(arr)
 
 def exp(val):
     val = array(val) if type(val) != array else val
-    val._data = np.exp(val._data.astype(float))
-    return val
+    arr = np.exp(val._data.astype(float))
+    return array(arr)
 
 def log(val):
     val = array(val) if type(val) != array else val

@@ -14,8 +14,12 @@ from collections import Counter
 
 
 def sigmoid(p):
-    return (2.718 ** p)/ (1 + 2.718 ** p)
+    return 1 / (1 + lt.exp(-p))
 
+def softmax(raw_predictions):
+    numerator = lt.exp(raw_predictions) 
+    denominator = lt.sum(lt.exp(raw_predictions), dim=1).reshape(-1, 1)
+    return numerator / denominator
 
 def converter(v,lst):
     n_lst = []
@@ -24,19 +28,19 @@ def converter(v,lst):
             n_lst.append(1)
         else:
             n_lst.append(0)
-    return n_lst
+    return array(n_lst)
 
         
 
 class Gradient_Boost:
-    def __init__(self, n_learners= 5, max_depth=5,gamma = 0.1,min_sample_split= 2, n_feats=None, mode='cls'):
+    def __init__(self, n_learners= 5, max_depth=5,gamma = 0.1,min_sample_split= 2, n_feats=None, mode='cls',mclass =False):
         self.n_learners = n_learners
         self.gamma = gamma
         self.min_sample_split = min_sample_split
         self.max_depth = max_depth
         self.n_feats = n_feats
         self.mode = 'grd' if mode == 'cls' else mode
-        self.is_mclass = False
+        self.is_mclass = mclass
         
         
     def fit(self, X,y):
@@ -82,16 +86,33 @@ class Gradient_Boost:
                 self.leaf = sigmoid(log_odds)
                 self.trees = training_sequence((y, log_odds))
             else:
-                pass
-
-                        
+                log_odd_lst = lt.zeros((n_samples, len(self.classes)))
+                label_lst = lt.zeros((n_samples, len(self.classes)))
+                for i in self.classes:
+                    ohp = converter(i, y)
+                    label_lst[:,i] = ohp
+                    prob_pst = lt.sum(ohp[ohp== 1])/ lt.sum(lt.where(ohp > 0,ohp, ohp + 1))
+                    log_odds = lt.log(prob_pst/(1-prob_pst))
+                    log_odds = lt.full(n_samples,log_odds)
+                    log_odd_lst[:,i] = log_odds
+                soft_prob = softmax(log_odd_lst)
+                self.leaf = soft_prob
+                self.trees = empty(shape=(self.n_learners,len(self.classes)),dtype=object)
+                for v in range(self.n_learners):
+                    base_pred_lst = lt.zeros((n_samples, len(self.classes)))
+                    for x in self.classes:
+                        prob = soft_prob[:,x]
+                        y_true = label_lst[:,x]
+                        y_ = y_true - prob
+                        tree = Decision_Tree(min_sample_split=self.min_sample_split, max_depth=self.max_depth,n_feats=self.n_feats, mode=self.mode)
+                        tree.fit(self.X,y_)
+                        predictions = tree.predict(self.X)
+                        grad_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(predictions,prob)])
+                        base_pred = prob + self.gamma * grad_output
+                        base_pred_lst[:,x] = base_pred
+                        self.trees[v,x] = tree
+                    soft_prob = softmax(base_pred_lst)
                 
-                
-                
-                    
-                    
-        
-        
     
     
     def predict(self, X):
@@ -122,11 +143,23 @@ class Gradient_Boost:
                 return arr
             
             n_samples = X.shape[0]
-            leaf = self.leaf[:n_samples]
             if self.is_mclass == False:
+                leaf = self.leaf[:n_samples]
                 return array(calculate_value(leaf,self.trees,X))
             else:
-                pass
+                cls_arr_lst = lt.zeros((n_samples,len(self.classes)))
+                for i in self.classes:
+                    leaf = self.leaf[:n_samples, i]
+                    trees = self.trees[:,i]
+                    cls_arr_lst[:,i] = array(calculate_value(leaf,trees,X,mc=True))
+                probabilities = softmax(cls_arr_lst)
+                pred = lt.argmax(probabilities, axis=1)
+                return pred
+                    
+                
+
+                    
+
         
                 
                 

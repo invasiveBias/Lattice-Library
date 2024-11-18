@@ -890,23 +890,22 @@ class Slice:
     def forward(self, a, index):
         requires_grad = a.requires_grad
         if type(index) == tuple and type(index[1]) == array:
-            index = index[1]._data.astype(int) #if index[1].dtype == float else index[1]._data 
-            data = a._data[:,index]
+            ind_ = index[1]._data.astype(int)
+            data = a._data[index[0],ind_]
             
         elif type(index) == tuple and type(index[0]) == array:
-            index = index[0]._data.astype(int) #if index[0].dtype == float else index[0]._data 
-            data =  a._data[index,:]
+            ind_ = index[0]._data.astype(int)
+            data =  a._data[ind_,index[1]]
             
         elif type(index) == array:
             index = index._data.astype(int) if index.dtype == float else index._data
             data = a._data[index]
-            #print(f"index: {index} \n data: {a}, \n result: {data}")
         else:
             data = a._data[index]
             
         
         # Create new Tensor:
-        z = array(data, requires_grad=requires_grad, operation=self)
+        z = array(data, requires_grad=requires_grad, operation=self,dtype=a.dtype)
        
         # Add new Tensors to "children" and old Tensors to "parents":
         self.parents = (a,)
