@@ -90,7 +90,7 @@ class Gradient_Boost:
                 self.classes = lt.unique(y)
                 prob_pst = [lt.sum(y_ohe[y_ohe[:,c]== 1])/ lt.sum(lt.where(y_ohe[:,c] > 0,y_ohe[:,c], y_ohe[:,c] + 1)) for c in self.classes]
                 base_pred = lt.tile(prob_pst,[n_samples,1])
-                self.leaf = softmax(sigmoid(base_pred))
+                self.leaf = lt.tile(prob_pst,[n_samples,1])
                 self.forest = []
                 for m in range(self.n_learners):
                     prob = sigmoid(base_pred)
@@ -105,7 +105,8 @@ class Gradient_Boost:
                         base_pred[:,c] +=  self.gamma * tree_output
                         tree_cluster.append(tree)
                     self.forest.append(tree_cluster)
-                print(base_pred)
+                
+
                 
     
     
@@ -141,9 +142,13 @@ class Gradient_Boost:
                 leaf = self.leaf[:n_samples]
                 return array(calculate_value(leaf,self.trees,X))
             else:
-                forest = np.array(self.forest)
                 leaf = self.leaf[:n_samples]
-                pred = lt.zeros((n_samples,len(self.classes)))
+                for cluster in self.forest:
+                    for c in self.classes:
+                        prediction = cluster[c].predict(X)
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(prediction,leaf[:,c])])
+                        leaf[:,c] += self.gamma * tree_output
+
                 
                 
 

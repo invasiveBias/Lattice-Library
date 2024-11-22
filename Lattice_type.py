@@ -890,17 +890,21 @@ class Slice:
         requires_grad = a.requires_grad
         if type(index) == tuple and type(index[1]) == array:
             ind_ = index[1]._data.astype(int)
-            data = a._data[index[0],ind_]
+            val = a._data[index[0],ind_]
+            data = val if type(val) != array else val._data
             
         elif type(index) == tuple and type(index[0]) == array:
             ind_ = index[0]._data.astype(int)
-            data =  a._data[ind_,index[1]]
+            val = a._data[ind_,index[1]]
+            data =  val if type(val) != array else val._data
             
         elif type(index) == array:
             index = index._data.astype(int) if index.dtype == float else index._data
-            data = a._data[index]
+            val = a._data[index]
+            data = val if type(val) != array else val._data
         else:
-            data = a._data[index]
+            val = a._data[index]
+            data = val if type(val) != array else val._data
             
         
         # Create new Tensor:
