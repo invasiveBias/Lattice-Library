@@ -86,32 +86,26 @@ class Gradient_Boost:
                 self.leaf = sigmoid(log_odds)
                 self.trees = training_sequence((y, log_odds))
             else:
-                log_odd_lst = lt.zeros((n_samples, len(self.classes)))
-                label_lst = lt.zeros((n_samples, len(self.classes)))
-                for i in self.classes:
-                    ohp = converter(i, y)
-                    label_lst[:,i] = ohp
-                    prob_pst = lt.sum(ohp[ohp== 1])/ lt.sum(lt.where(ohp > 0,ohp, ohp + 1))
-                    log_odds = lt.log(prob_pst/(1-prob_pst))
-                    log_odds = lt.full(n_samples,log_odds)
-                    log_odd_lst[:,i] = log_odds
-                soft_prob = softmax(log_odd_lst)
-                self.leaf = soft_prob
-                self.trees = empty(shape=(self.n_learners,len(self.classes)),dtype=object)
-                for v in range(self.n_learners):
-                    base_pred_lst = lt.zeros((n_samples, len(self.classes)))
-                    for x in self.classes:
-                        prob = soft_prob[:,x]
-                        y_true = label_lst[:,x]
-                        y_ = y_true - prob
+                y_ohe = lt.one_hot(y)
+                self.classes = lt.unique(y)
+                prob_pst = [lt.sum(y_ohe[y_ohe[:,c]== 1])/ lt.sum(lt.where(y_ohe[:,c] > 0,y_ohe[:,c], y_ohe[:,c] + 1)) for c in self.classes]
+                base_pred = lt.tile(prob_pst,[n_samples,1])
+                self.leaf = softmax(sigmoid(base_pred))
+                self.forest = []
+                for m in range(self.n_learners):
+                    prob = sigmoid(base_pred)
+                    y_hat = softmax(prob)
+                    residual = y_ohe - y_hat
+                    tree_cluster = []
+                    for c in self.classes:
                         tree = Decision_Tree(min_sample_split=self.min_sample_split, max_depth=self.max_depth,n_feats=self.n_feats, mode=self.mode)
-                        tree.fit(self.X,y_)
-                        predictions = tree.predict(self.X)
-                        grad_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(predictions,prob)])
-                        base_pred = prob + self.gamma * grad_output
-                        base_pred_lst[:,x] = base_pred
-                        self.trees[v,x] = tree
-                    soft_prob = softmax(base_pred_lst)
+                        tree.fit(X,residual[:,c])
+                        prediction = tree.predict(X)
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(prediction,prob[:,c])])
+                        base_pred[:,c] +=  self.gamma * tree_output
+                        tree_cluster.append(tree)
+                    self.forest.append(tree_cluster)
+                print(base_pred)
                 
     
     
@@ -147,15 +141,10 @@ class Gradient_Boost:
                 leaf = self.leaf[:n_samples]
                 return array(calculate_value(leaf,self.trees,X))
             else:
-                cls_arr_lst = lt.zeros((n_samples,len(self.classes)))
-                for i in self.classes:
-                    leaf = self.leaf[:n_samples, i]
-                    trees = self.trees[:,i]
-                    cls_arr_lst[:,i] = array(calculate_value(leaf,trees,X,mc=True))
-                probabilities = softmax(cls_arr_lst)
-                pred = lt.argmax(probabilities, axis=1)
-                return pred
-                    
+                forest = np.array(self.forest)
+                leaf = self.leaf[:n_samples]
+                pred = lt.zeros((n_samples,len(self.classes)))
+                
                 
 
                     

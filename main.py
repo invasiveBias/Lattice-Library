@@ -107,3 +107,6 @@ def column_stack(lst:tuple):
 def row_stack(lst:tuple):
     return array(np.row_stack(lst))
 
+
+
+

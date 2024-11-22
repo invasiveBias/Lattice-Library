@@ -67,8 +67,8 @@ def exp(val):
 
 def log(val):
     val = array(val) if type(val) != array else val
-    val._data = np.log(val._data.astype(float))
-    return val
+    arr = np.log(val._data.astype(float))
+    return array(arr)
 
 def log10(val):
     val = array(val) if type(val) != array else val
@@ -83,8 +83,8 @@ def log2(val):
 
 def sqrt(val):
     val = array(val) if type(val) != array else val
-    val._data = np.sqrt(val._data.astype(float))
-    return val
+    arr = np.sqrt(val._data.astype(float))
+    return array(arr)
 
 def argsort(val,*args, **kwargs):
     val = array(val) if type(val) != array else val
@@ -136,6 +136,27 @@ def full(shape, fill_value, dtype=None):
     arr = np.full(shape=shape, fill_value=fill_value._data,dtype=dtype)
     return array(arr)
 
+def one_hot(arr):
+    arr = array(arr) if type(arr) != array else arr
+    classes = unique(arr)
+    def converter(v,lst):
+        n_lst = []
+        for i in lst:
+            if i == v:
+                n_lst.append(1)
+            else:
+                n_lst.append(0)
+        return n_lst
+    ohm = empty((arr.shape[0], len(classes)))
+    for v in classes:
+        ohm[:,v] = converter(v,arr)
+    return ohm
+
+def tile(A, reps):
+    A = np.array(A) if type(A) != array else A._data
+    return array(np.tile(A, reps))
+
+
 class matrix_comp():
     def __init__(Self):
         pass
@@ -151,8 +172,8 @@ class matrix_comp():
     @staticmethod
     def mat_inv(val):
         val = array(val) if type(val) != array else val
-        val._data = np.linalg.inv(val._data)
-        return val
+        val = np.linalg.inv(val._data)
+        return array(val)
     
     @staticmethod
     def eigen(val):
@@ -163,8 +184,8 @@ class matrix_comp():
     @staticmethod
     def det(val):
         val = array(val) if type(val) != array else val
-        val._data = np.linalg.det(val._data)
-        return val
+        val = np.linalg.det(val._data)
+        return array(val)
     
     @staticmethod
     def svd(val,herm=False):
@@ -175,14 +196,14 @@ class matrix_comp():
     @staticmethod
     def pinv(val):
         val = array(val) if type(val) != array else val
-        val._data = np.linalg.pinv(val._data)
-        return val
+        val = np.linalg.pinv(val._data)
+        return array(val)
     
     @staticmethod
     def trace(val):
         val = array(val) if type(val) != array else val
-        val._data = np.trace(val._data)
-        return val
+        arr = np.trace(val._data)
+        return array(arr)
     
     
     @staticmethod

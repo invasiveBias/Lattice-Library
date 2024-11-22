@@ -232,17 +232,16 @@ class array(metaclass= Lattice_object):
         
     def __setitem__(self, index, value):
         if type(index) == tuple and type(index[0]) == array:
-            index = index[0]._data.astype(int) if index[0].dtype == float else index[0]._data
-            self._data[index,:] = value
+            ind_ = index[0]._data.astype(int) if index[0].dtype == float else index[0]._data
+            self._data[ind_,index[1]] = value._data if type(value) == array else value
         elif type(index) == tuple and type(index[1]) == array:
-            index = index[1]._data.astype(int) if index[1].dtype == float else index[1]._data
-            self._data[:,index] = value
+            ind_ = index[1]._data.astype(int) if index[1].dtype == float else index[1]._data
+            self._data[index[0],ind_] = value._data if type(value) == array else value
         elif type(index) == array:
             index = index._data.astype(int) if index.dtype == float else index._data
-        
-            self._data[index] = value
+            self._data[index] = value._data if type(value) == array else value
         else:
-            self._data[index] = value
+            self._data[index] = value._data if type(value) == array else value
     
     def __bool__(self):
         return self._data.tolist() != 0
@@ -865,7 +864,7 @@ class Transpose:
         data = a._data.swapaxes(*dims)
        
         # Create new Tensor:
-        z = array(data, requires_grad=requires_grad, operation=self)
+        z = array(data, requires_grad=requires_grad, operation=self) 
        
         # Add new Tensors to "children" and old Tensors to "parents": 
         self.parents = (a,)
@@ -905,7 +904,7 @@ class Slice:
             
         
         # Create new Tensor:
-        z = array(data, requires_grad=requires_grad, operation=self,dtype=a.dtype)
+        z = array(data, requires_grad=requires_grad, operation=self) 
        
         # Add new Tensors to "children" and old Tensors to "parents":
         self.parents = (a,)
