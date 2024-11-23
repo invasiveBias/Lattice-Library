@@ -18,7 +18,7 @@ def sigmoid(p):
 
 def softmax(raw_predictions):
     numerator = lt.exp(raw_predictions) 
-    denominator = lt.sum(lt.exp(raw_predictions), dim=1).reshape(-1, 1)
+    denominator = lt.sum(lt.exp(raw_predictions), dim=1,keepdims=True)
     return numerator / denominator
 
 def converter(v,lst):
@@ -101,7 +101,7 @@ class Gradient_Boost:
                         tree = Decision_Tree(min_sample_split=self.min_sample_split, max_depth=self.max_depth,n_feats=self.n_feats, mode=self.mode)
                         tree.fit(X,residual[:,c])
                         prediction = tree.predict(X)
-                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(prediction,prob[:,c])])
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred) + 1e-10) for pred, prob_i in zip(prediction,y_hat[:,c])])
                         base_pred[:,c] +=  self.gamma * tree_output
                         tree_cluster.append(tree)
                     self.forest.append(tree_cluster)
@@ -143,11 +143,16 @@ class Gradient_Boost:
                 return array(calculate_value(leaf,self.trees,X))
             else:
                 leaf = self.leaf[:n_samples]
+                prob = softmax(sigmoid(leaf))
                 for cluster in self.forest:
                     for c in self.classes:
                         prediction = cluster[c].predict(X)
-                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(prediction,leaf[:,c])])
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred))  for pred, prob_i in zip(prediction,prob[:,c])])
                         leaf[:,c] += self.gamma * tree_output
+
+                y_prob = sigmoid(leaf)
+                y_soft = softmax(y_prob)
+                return lt.argmax(y_soft, axis=1)
 
                 
                 

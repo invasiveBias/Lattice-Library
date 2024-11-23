@@ -233,15 +233,15 @@ class array(metaclass= Lattice_object):
     def __setitem__(self, index, value):
         if type(index) == tuple and type(index[0]) == array:
             ind_ = index[0]._data.astype(int) if index[0].dtype == float else index[0]._data
-            self._data[ind_,index[1]] = value._data if type(value) == array else value
+            self._data[ind_,index[1]] = value._data if type(value) == array else array(value)._data
         elif type(index) == tuple and type(index[1]) == array:
             ind_ = index[1]._data.astype(int) if index[1].dtype == float else index[1]._data
-            self._data[index[0],ind_] = value._data if type(value) == array else value
+            self._data[index[0],ind_] = value._data if type(value) == array else array(value)._data
         elif type(index) == array:
             index = index._data.astype(int) if index.dtype == float else index._data
-            self._data[index] = value._data if type(value) == array else value
+            self._data[index] = value._data if type(value) == array else array(value)._data
         else:
-            self._data[index] = value._data if type(value) == array else value
+            self._data[index] = value._data if type(value) == array else array(value)._data
     
     def __bool__(self):
         return self._data.tolist() != 0
@@ -891,20 +891,20 @@ class Slice:
         if type(index) == tuple and type(index[1]) == array:
             ind_ = index[1]._data.astype(int)
             val = a._data[index[0],ind_]
-            data = val if type(val) != array else val._data
+            data = array(val)._data if type(val) != array else val._data
             
         elif type(index) == tuple and type(index[0]) == array:
             ind_ = index[0]._data.astype(int)
             val = a._data[ind_,index[1]]
-            data =  val if type(val) != array else val._data
+            data =  array(val)._data if type(val) != array else val._data
             
         elif type(index) == array:
             index = index._data.astype(int) if index.dtype == float else index._data
             val = a._data[index]
-            data = val if type(val) != array else val._data
+            data = array(val)._data if type(val) != array else val._data
         else:
             val = a._data[index]
-            data = val if type(val) != array else val._data
+            data = array(val)._data if type(val) != array else val._data
             
         
         # Create new Tensor:

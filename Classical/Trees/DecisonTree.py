@@ -40,6 +40,7 @@ class Decision_Tree:
         self.n_feats = n_feats
         self.root = None
         self.mode = mode
+        self.default = 0 if self.mode != 'grd' else [0]
         if self.mode not in ['cls','rgs','grd']:
             raise Exception(f'Mode can only be "cls" for classification, "rgs" for regression or "grd" for gradient boosting methods and not {mode}')
     
@@ -49,14 +50,14 @@ class Decision_Tree:
         self.n_feats = X.shape[1] if not self.n_feats else min(self.n_feats,X.shape[1])
         self.root = self.grow_tree(X,y)
     
+
     def grow_tree(self,X,y, depth=0,default_value=0):
         n_samples, n_features = X.shape
         n_labels = len(lt.unique(y))
-
         
         if depth>= self.max_depth or n_labels <= 1 or  n_samples < self.min_sample_split:
             if len(y) == 0:
-                leaf_value = default_value if default_value is not None else 0
+                leaf_value = default_value if default_value is not None else self.default
             else:
                 if self.mode == 'cls':
                     leaf_value = self.most_common_label(y)  
