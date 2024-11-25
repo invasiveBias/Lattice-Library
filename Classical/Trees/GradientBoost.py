@@ -66,7 +66,7 @@ class Gradient_Boost:
                     tree = Decision_Tree(min_sample_split=self.min_sample_split, max_depth=self.max_depth,n_feats=self.n_feats, mode=self.mode)
                     tree.fit(self.X,y_)
                     predictions = tree.predict(self.X)
-                    grad_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(predictions,prob)])
+                    grad_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred) + 1e-7) for pred, prob_i in zip(predictions,base_pred)])
                     base_pred = prob + self.gamma * grad_output
                     built_trees.append(tree)
                     
@@ -101,14 +101,10 @@ class Gradient_Boost:
                         tree = Decision_Tree(min_sample_split=self.min_sample_split, max_depth=self.max_depth,n_feats=self.n_feats, mode=self.mode)
                         tree.fit(X,residual[:,c])
                         prediction = tree.predict(X)
-                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred) + 1e-10) for pred, prob_i in zip(prediction,y_hat[:,c])])
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred) + 1e-12) for pred, prob_i in zip(prediction,prob[:,c])])
                         base_pred[:,c] +=  self.gamma * tree_output
                         tree_cluster.append(tree)
                     self.forest.append(tree_cluster)
-                
-
-                
-    
     
     def predict(self, X):
         X = array(X)
@@ -124,8 +120,7 @@ class Gradient_Boost:
                 for tree in trees:
                     predictions = tree.predict(X)
                     grad_output = [lt.sum(pred)/ ((prob_i * (1 - prob_i)) * len(pred)) for pred, prob_i in zip(predictions,leaf)]
-                    grad_output += self.gamma * array(grad_output)
-                log_odds = leaf + grad_output
+                log_odds = leaf + self.gamma * array(grad_output)
                 if mc:
                     return log_odds
                 pred = sigmoid(log_odds)
@@ -143,11 +138,10 @@ class Gradient_Boost:
                 return array(calculate_value(leaf,self.trees,X))
             else:
                 leaf = self.leaf[:n_samples]
-                prob = softmax(sigmoid(leaf))
                 for cluster in self.forest:
                     for c in self.classes:
                         prediction = cluster[c].predict(X)
-                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred))  for pred, prob_i in zip(prediction,prob[:,c])])
+                        tree_output = array([lt.sum(pred)/ ((prob_i * (1 - prob_i)) *len(pred))  for pred, prob_i in zip(prediction,leaf[:,c])])
                         leaf[:,c] += self.gamma * tree_output
 
                 y_prob = sigmoid(leaf)

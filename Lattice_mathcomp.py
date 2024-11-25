@@ -12,6 +12,11 @@ def sum(val,dim= None,keepdims= None):
     val = array(val) if type(val) != array else val
     arr = np.sum(val._data,axis=dim, keepdims=keepdims) if keepdims != None else np.sum(val._data,axis=dim)
     return array(arr,requires_grad = val.requires_grad)
+
+def max(val,dim= None,keepdims= None):
+    val = array(val) if type(val) != array else val
+    arr = np.max(val._data,axis=dim)
+    return array(arr,requires_grad = val.requires_grad)
     
     
 def mean(val,dim=None):
